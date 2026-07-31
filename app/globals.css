@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --canvas: 247 247 245;
+  --surface: 255 255 255;
+  --ink: 23 23 25;
+  --muted: 105 105 112;
+  --line: 226 226 226;
+}
+
+.dark {
+  color-scheme: dark;
+  --canvas: 13 13 15;
+  --surface: 27 27 30;
+  --ink: 245 245 247;
+  --muted: 161 161 170;
+  --line: 52 52 56;
+}
+
+* {
+  border-color: rgb(var(--line));
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
+  background: rgb(var(--canvas));
+}
+
+body {
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: rgba(185, 139, 49, 0.24);
+}
+
+@layer components {
+  .card {
+    @apply rounded-[1.75rem] border border-line/80 bg-surface shadow-apple;
+  }
+
+  .field-label {
+    @apply mb-2 block text-[13px] font-semibold tracking-[-0.01em] text-ink;
+  }
+
+  .field-input {
+    @apply h-12 w-full rounded-2xl border border-line bg-canvas/70 px-4 text-[15px] text-ink outline-none transition placeholder:text-muted/60 focus:border-gold-500 focus:bg-surface focus:ring-4 focus:ring-gold-500/10 disabled:cursor-not-allowed disabled:opacity-70;
+  }
+
+  .primary-button {
+    @apply inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-ink px-5 text-sm font-semibold text-canvas shadow-sm transition hover:opacity-90 focus:outline-none focus:ring-4 focus:ring-gold-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gold-400 dark:text-zinc-950;
+  }
+
+  .secondary-button {
+    @apply inline-flex h-11 items-center justify-center gap-2 rounded-2xl border border-line bg-surface px-4 text-sm font-semibold text-ink transition hover:bg-canvas focus:outline-none focus:ring-4 focus:ring-gold-500/15;
+  }
+}
+
+@media (display-mode: standalone) {
+  body {
+    overscroll-behavior-y: none;
+    user-select: none;
+  }
+
+  input,
+  textarea {
+    user-select: text;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

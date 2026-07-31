@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Kuyumcu Takip">
+  <defs>
+    <linearGradient id="g" x1="72" y1="40" x2="440" y2="472" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#e9d9aa"/>
+      <stop offset=".48" stop-color="#b98b31"/>
+      <stop offset="1" stop-color="#654720"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="126" fill="#171719"/>
+  <path d="M160 116h76v120l101-120h94L308 255l133 141h-99L236 275v121h-76V116Z" fill="url(#g)"/>
+</svg>
