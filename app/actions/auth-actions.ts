@@ -29,9 +29,14 @@ export async function loginAction(
     const supabase = await createSupabaseServerClient();
     const { error } = await supabase.auth.signInWithPassword(result.data);
     if (error) return { message: "E-posta veya şifre hatalı." };
-  } catch {
-    return { message: "Giriş servisine ulaşılamadı. Lütfen tekrar deneyin." };
-  }
+  } catch (error) {
+  return {
+    message:
+      error instanceof Error
+        ? `Bağlantı hatası: ${error.message}`
+        : "Giriş servisine ulaşılamadı.",
+  };
+}
 
   redirect("/panel");
 }
