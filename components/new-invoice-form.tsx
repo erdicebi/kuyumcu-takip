@@ -80,7 +80,7 @@ export function NewInvoiceForm() {
         <div className="grid gap-5 sm:grid-cols-2">
           <div>
             <label htmlFor="tc" className="field-label">TC Kimlik No</label>
-            <input id="tc" name="tc" inputMode="numeric" autoComplete="off" maxLength={11} className="field-input font-mono tracking-[0.08em]" placeholder="11 haneli TC" aria-describedby="tc-error" onInput={(event) => { event.currentTarget.value = event.currentTarget.value.replace(/\D/g, "").slice(0, 11); }} required />
+            <input id="tc" name="tc" inputMode="numeric" autoComplete="off" maxLength={11} className="field-input font-mono tracking-[0.08em]" placeholder="11 haneli TC" aria-describedby="tc-error" onInput={(event) => { event.currentTarget.value = event.currentTarget.value.replace(/\D/g, "").slice(0, 11); }} />
             <FieldError id="tc-error" errors={state.errors?.tc} />
           </div>
 
