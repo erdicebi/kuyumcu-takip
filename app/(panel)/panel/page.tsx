@@ -30,7 +30,34 @@ function MetricCard({ label, value, detail, icon: Icon, tone }: { label: string;
 }
 
 export default async function DashboardPage() {
-  const [stats, recent] = await Promise.all([getDashboardStats(), listInvoices({ limit: 5 })]);
+  let stats;
+  let recent;
+
+  try {
+    stats = await getDashboardStats();
+  } catch (error) {
+    return (
+      <div className="card p-6">
+        <h1 className="text-xl font-bold">İstatistik hatası</h1>
+        <p className="mt-3 break-words text-sm text-red-600">
+          {error instanceof Error ? error.message : "Bilinmeyen hata"}
+        </p>
+      </div>
+    );
+  }
+
+  try {
+    recent = await listInvoices({ limit: 5 });
+  } catch (error) {
+    return (
+      <div className="card p-6">
+        <h1 className="text-xl font-bold">Fatura listesi hatası</h1>
+        <p className="mt-3 break-words text-sm text-red-600">
+          {error instanceof Error ? error.message : "Bilinmeyen hata"}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <>
