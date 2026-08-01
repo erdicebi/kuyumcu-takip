@@ -22,7 +22,13 @@ const decimalInput = (label: string, maximum: number, decimals: number) =>
     .refine((value) => value <= maximum, `${label} izin verilen sınırı aşıyor`);
 
 export const invoiceFormSchema = z.object({
-  tc: z.string().trim().refine(isValidTc, "Geçerli bir TC Kimlik No girin"),
+  tc: z
+  .string()
+  .trim()
+  .refine(
+    (value) => value === "" || /^\d{11}$/.test(value),
+    "TC Kimlik No 11 haneli olmalıdır"
+  ),
   customerName: z
     .string()
     .trim()
