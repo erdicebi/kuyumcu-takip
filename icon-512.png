@@ -1,0 +1,13 @@
+export type InvoiceStatus = "Bekliyor" | "Kesildi";
+export type Invoice = {
+  id: string;
+  invoice_number: number;
+  tc: string | null;
+  customer_name: string | null;
+  product: "24 Ayar";
+  gram: number;
+  gram_price: number;
+  total: number;
+  status: InvoiceStatus;
+  created_at: string;
+};

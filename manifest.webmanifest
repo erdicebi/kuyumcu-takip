@@ -1,0 +1,86 @@
+const URL = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
+const KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const ACCESS_KEY = "kuyumcu_access_token";
+const REFRESH_KEY = "kuyumcu_refresh_token";
+const EMAIL_KEY = "kuyumcu_user_email";
+
+function config() {
+  if (!URL || !KEY) throw new Error("Supabase ortam değişkenleri eksik.");
+  return { url: URL, key: KEY };
+}
+
+export function getStoredUser(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(EMAIL_KEY);
+}
+
+export function clearSession() {
+  localStorage.removeItem(ACCESS_KEY);
+  localStorage.removeItem(REFRESH_KEY);
+  localStorage.removeItem(EMAIL_KEY);
+}
+
+function saveSession(data: { access_token: string; refresh_token?: string; user?: { email?: string } }, fallbackEmail?: string) {
+  localStorage.setItem(ACCESS_KEY, data.access_token);
+  if (data.refresh_token) localStorage.setItem(REFRESH_KEY, data.refresh_token);
+  if (data.user?.email || fallbackEmail) localStorage.setItem(EMAIL_KEY, data.user?.email || fallbackEmail || "");
+}
+
+export async function signIn(email: string, password: string) {
+  const { url, key } = config();
+  const response = await fetch(`${url}/auth/v1/token?grant_type=password`, {
+    method: "POST",
+    headers: { apikey: key, "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error_description || data.msg || "Giriş başarısız.");
+  saveSession(data, email);
+  return data.user;
+}
+
+async function refreshSession(): Promise<boolean> {
+  const { url, key } = config();
+  const refreshToken = localStorage.getItem(REFRESH_KEY);
+  if (!refreshToken) return false;
+  const response = await fetch(`${url}/auth/v1/token?grant_type=refresh_token`, {
+    method: "POST",
+    headers: { apikey: key, "Content-Type": "application/json" },
+    body: JSON.stringify({ refresh_token: refreshToken }),
+  });
+  if (!response.ok) { clearSession(); return false; }
+  saveSession(await response.json());
+  return true;
+}
+
+async function request(path: string, init: RequestInit, retry: boolean): Promise<unknown> {
+  const { url, key } = config();
+  const token = localStorage.getItem(ACCESS_KEY);
+  if (!token) throw new Error("Oturum bulunamadı. Yeniden giriş yapın.");
+  const response = await fetch(`${url}${path}`, {
+    ...init,
+    headers: {
+      apikey: key,
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+      Prefer: "return=representation",
+      ...(init.headers || {}),
+    },
+  });
+  if (response.status === 401 && retry && await refreshSession()) return request(path, init, false);
+  const text = await response.text();
+  let data: unknown = null;
+  if (text) { try { data = JSON.parse(text); } catch { data = text; } }
+  if (!response.ok) {
+    if (response.status === 401) clearSession();
+    const obj = data as { message?: string; msg?: string; hint?: string; error_description?: string } | null;
+    throw new Error(obj?.message || obj?.msg || obj?.hint || obj?.error_description || `İşlem başarısız (${response.status}).`);
+  }
+  return data;
+}
+
+async function api(path: string, init: RequestInit = {}) { return request(path, init, true); }
+export async function listInvoices() { return api("/rest/v1/invoices?select=*&order=created_at.desc"); }
+export async function createInvoice(payload: { p_tc: string | null; p_customer_name: string | null; p_gram: number; p_gram_price: number }) { return api("/rest/v1/rpc/create_invoice", { method: "POST", body: JSON.stringify(payload) }); }
+export async function updateInvoiceStatus(id: string, status: "Bekliyor" | "Kesildi") { return api(`/rest/v1/invoices?id=eq.${encodeURIComponent(id)}`, { method: "PATCH", body: JSON.stringify({ status }) }); }
+export async function deleteInvoice(id: string) { return api(`/rest/v1/invoices?id=eq.${encodeURIComponent(id)}`, { method: "DELETE" }); }
